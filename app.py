@@ -44,12 +44,16 @@ class LoginForm(FlaskForm):
 
 
 class RegisterForm(FlaskForm):
+    firstName = StringField('First Name', validators=[InputRequired(), Length(max=25)])
+    middleName = StringField('Middle Name', validators=[InputRequired(), Length(max=25)])
+    lastName = StringField('last Name', validators=[InputRequired(), Length(max=25)])
     email = StringField('email', validators=[InputRequired(), Email(
         message='Invalid email'), Length(max=50)])
     username = StringField('username', validators=[
                            InputRequired(), Length(min=4, max=15)])
     password = PasswordField('password', validators=[
                              InputRequired(), Length(min=8, max=80)])
+    phoneNumber = StringField('Phone number', validators=[InputRequired(), Length(min=12, max=14)])
 
 
 @app.route('/')
@@ -82,11 +86,13 @@ def signup():
         hashed_password = generate_password_hash(
             form.password.data, method='sha256')
         new_user = User(username=form.username.data,
-                        email=form.email.data, password=hashed_password)
+                        email=form.email.data, password=hashed_password,
+                        firstName=form.firstName.data, middleName=form.middleName.data,
+                        lastName=form.lastName.data)
         db.session.add(new_user)
         db.session.commit()
 
-        return '<h1>New user has been created!</h1>'
+        return redirect(url_for('login'))
         # return '<h1>' + form.username.data + ' ' + form.email.data + ' ' + form.password.data + '</h1>'
 
     return render_template('signup.html', form=form)
@@ -103,6 +109,26 @@ def dashboard():
 def logout():
     logout_user()
     return redirect(url_for('index'))
+
+@app.route('/addCustomer')
+def addCustomer():
+    return render_template('addCustomer.html', name=current_user.username)
+
+@app.route('/chat')
+def Chat():
+    return render_template('chat.html', name=current_user.username)
+
+@app.route('/contribution')
+def Contribution():
+    return render_template('contribution.html', name=current_user.username)
+
+@app.route('/group')
+def Group():
+    return render_template('group.html', name=current_user.username)
+
+@app.route('/collection')
+def Collection():
+    return render_template('collection.html', name=current_user.username)
 
 
 if __name__ == '__main__':
